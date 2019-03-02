@@ -1,6 +1,6 @@
 # for getting html + kar
 import requests
-# beutify
+# beautify
 from bs4 import *
 import difflib
 import re
