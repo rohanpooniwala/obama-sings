@@ -31,13 +31,11 @@ def search_link(name):
 		try:
 			link = a['href']
 			#print (a.encode('utf-8'))
-			links.append(link)
-			s_name = a.text
-			break
+			links.append([youtube_dl.utils.sanitize_filename(a.text), "www.youtube.com"+link])
 		except KeyError:
 			continue
 
-	return youtube_dl.utils.sanitize_filename(s_name),"www.youtube.com"+links[0]
+	return links
 
 def download(name, link, filename='', audio_only=False):
 	try:
@@ -58,12 +56,15 @@ def download(name, link, filename='', audio_only=False):
 				}],
 				'download_archive': './temp_video/downloaded',
 				'outtmpl': "./temp_video/"+filename+'.%(ext)s',
+				'fragment_retries': "infinite",
+
 				#'restrictfilenames': True,
 			}
 
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
 			ydl.download([link])
-			
+		
+		return True
 	except Exception as e:
 		print (e)
-		pass
+		return False

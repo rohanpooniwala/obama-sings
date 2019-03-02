@@ -60,10 +60,19 @@ def download_kar(song_inf):
     with open(filename, 'wb') as sf:
         sf.write(r.content)
 
+import time
 def download_video(query):
-    name, link = google_scrap.search_link(query)
+    links = google_scrap.search_link(query)
+    print("Links:", links)
+    name, link = links[0]
     print("Downloading:", name, link)
-    google_scrap.download(name, link)
+    
+    _ = google_scrap.download(name, link)
+    while not _:
+        time.sleep(15)
+        print("retry")
+
+        _ = google_scrap.download(name, "http://" + link)
 
 if __name__ == "__main__":
     songname = str(input("Song name: "))
@@ -71,6 +80,6 @@ if __name__ == "__main__":
     file_name = get_song_links(songname)
 
     download_kar(file_name[0])
-    download_video(songname)
+    # download_video(songname)
 # print (file_name)
 # print(file_name)
