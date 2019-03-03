@@ -5,6 +5,8 @@ from bs4 import *
 import difflib
 import re
 import google_scrap
+import time
+
 
 root_site = "http://www.karaokeden.com"
 links_to_serach = ['/karaoke/browse/English',    
@@ -60,11 +62,8 @@ def download_kar(song_inf):
     with open(filename, 'wb') as sf:
         sf.write(r.content)
 
-import time
-def download_video(query):
-    links = google_scrap.search_link(query)
-    print("Links:", links)
-    name, link = links[0]
+def download_video(link_data):
+    name, link = link_data
     print("Downloading:", name, link)
     
     _ = google_scrap.download(name, link)
@@ -80,6 +79,6 @@ if __name__ == "__main__":
     file_name = get_song_links(songname)
 
     download_kar(file_name[0])
-    # download_video(songname)
+    # download_video(links = google_scrap.search_link(songname))
 # print (file_name)
 # print(file_name)
