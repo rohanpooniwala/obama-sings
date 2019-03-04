@@ -3,4 +3,6 @@ temp_video/
 temp_midi/
 temp_mp3/
 *.mp4
+*.kar
+*.mp3
 __pychache__/
