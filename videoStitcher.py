@@ -25,18 +25,22 @@ def videoStitching(filenamesTS, folderPath):
     len_r = float(random_1st_idle.split('_')[3].replace(".mp4", "")) - float(random_1st_idle.split('_')[2])
     r = filenamesTS[0][0] / len_r
     # shutil.copyfile(folderPath+'/cache/IdleClips/'+random_1st_idle, folderPath+"forStitching/"+folderPath.split('/')[-2]+"_0.00_0_0_Idle.mp4")
-    r1st_idle = folderPath + 'forStitching/first.mp4'
+    r1st_idle = folderPath + 'forStitching/first'
     print('Running',
           '\n\tffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
               r) + '*PTS ' + r1st_idle)
     subprocess.run(
         'ffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
-            r) + '*PTS ' + r1st_idle + ' -y',
+            r) + '*PTS ' + r1st_idle+ "_.mp4" + ' -y',
+        shell=True)
+    null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
+    subprocess.run(
+        null_command.format(r1st_idle + '_.mp4', r1st_idle + '.mp4').split(' '),
         shell=True)
 
     f = open(folderPath + "stitchVideo.txt", "w")
     print('Stitch video file path:', folderPath + "stitchVideo.txt")
-    f.write('file ' + r1st_idle + "\n")
+    f.write('file ' + r1st_idle + ".mp4\n")
 
     #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
     video_crop2(folderPath + filenamesTS[0][1].split("/")[-1].split("_")[0] + '.mp4',
@@ -131,7 +135,8 @@ def chooseIdleClip(ts_diff, prevf, folderPath):
             r) + '*PTS ' + idle_file_name + '__.mp4 -y',
         shell=True)
 
-    null_command = '''ffmpeg -f lavfi -i anullsrc -i {} -shortest -c:v copy -c:a aac -map 0:a -map 1:v {} -y'''
+    # null_command = '''ffmpeg -f lavfi -i anullsrc -i {} -shortest -c:v copy -c:a aac -map 0:a -map 1:v {} -y'''
+    null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
     subprocess.run(
         null_command.format(idle_file_name+ '__.mp4', idle_file_name + '.mp4').split(' '),
         shell=True)

@@ -67,8 +67,8 @@ if __name__ == "__main__":
     final_timestamps = [[_[0], ''.join(x for x in _[1] if x.isalpha() or x == "'")] for _ in final_timestamps]
     # print(final_timestamps)
 
-    filenamesTS = lyricsTS2filenamesTS(person, final_timestamps)
     # Videos cropped !!
+    filenamesTS = lyricsTS2filenamesTS(person, final_timestamps)
     videoStitching(filenamesTS, 'resources/' + person + "/")
     stitchFinal('resources/' + person + "/")
 
