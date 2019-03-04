@@ -1,10 +1,12 @@
 from lyricsTS2filenamesTS import lyricsTS2filenamesTS
 import datetime
-from video_crop_cache import video_crop2
+from video_crop_cache import video_crop2, offsetP, offsetA, getVidLength
 import subprocess
 import os
 import random
 import shutil
+
+max_vid_stretch = 3
 
 
 def convertTime(t):
@@ -20,27 +22,39 @@ def convertBackTime(t):
 def videoStitching(filenamesTS, folderPath):
     print('videoStitching', filenamesTS, folderPath)
 
-    random_1st_idle = random.choice(os.listdir(folderPath + '/cache/IdleClips/'))
-    print('Random Selected for first idle:', random_1st_idle)
-    len_r = float(random_1st_idle.split('_')[3].replace(".mp4", "")) - float(random_1st_idle.split('_')[2])
-    r = filenamesTS[0][0] / len_r
-    # shutil.copyfile(folderPath+'/cache/IdleClips/'+random_1st_idle, folderPath+"forStitching/"+folderPath.split('/')[-2]+"_0.00_0_0_Idle.mp4")
-    r1st_idle = folderPath + 'forStitching/first'
-    print('Running',
-          '\n\tffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
-              r) + '*PTS ' + r1st_idle)
-    subprocess.run(
-        'ffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
-            r) + '*PTS ' + r1st_idle+ "_.mp4" + ' -y',
-        shell=True)
-    null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
-    subprocess.run(
-        null_command.format(r1st_idle + '_.mp4', r1st_idle + '.mp4').split(' '),
-        shell=True)
-
     f = open(folderPath + "stitchVideo.txt", "w")
     print('Stitch video file path:', folderPath + "stitchVideo.txt")
-    f.write('file ' + r1st_idle + ".mp4\n")
+
+    r_time_rem = filenamesTS[0][0]
+    r_cnt = 0
+
+    while r_time_rem > 0:
+        random_1st_idle = random.choice(os.listdir(folderPath + '/cache/IdleClips/'))
+        print('Random Selected for first idle:', random_1st_idle)
+        # len_r = float(random_1st_idle.split('_')[3].replace(".mp4", "")) - float(random_1st_idle.split('_')[2])
+        # r = filenamesTS[0][0] / (len_r + 0.12)
+        len_r = getVidLength(folderPath + "cache/IdleClips/" + random_1st_idle)
+        r = r_time_rem / len_r
+
+        if r > max_vid_stretch:
+            r = max_vid_stretch
+        # shutil.copyfile(folderPath+'/cache/IdleClips/'+random_1st_idle, folderPath+"forStitching/"+folderPath.split('/')[-2]+"_0.00_0_0_Idle.mp4")
+        r1st_idle = folderPath + 'forStitching/first' + str(r_cnt)
+        print('Running',
+              '\n\tffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
+                  r) + '*PTS ' + r1st_idle)
+        subprocess.run(
+            'ffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_1st_idle + ' -vf ' + ' setpts=' + str(
+                r) + '*PTS ' + r1st_idle + "_.mp4" + ' -y',
+            shell=True)
+        null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
+        subprocess.run(
+            null_command.format(r1st_idle + '_.mp4', r1st_idle + '.mp4').split(' '),
+            shell=True)
+
+        f.write('file ' + r1st_idle + ".mp4\n")
+        r_time_rem -= getVidLength(r1st_idle + ".mp4")
+        r_cnt += 1
 
     #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
     video_crop2(folderPath + filenamesTS[0][1].split("/")[-1].split("_")[0] + '.mp4',
@@ -50,15 +64,16 @@ def videoStitching(filenamesTS, folderPath):
                 filenamesTS[0][1].split("_")[4].replace(".mp4", ""),
                 filenamesTS[0][1])
 
-    f.write("file '" + filenamesTS[0][1].replace("'", "") + "'\n")
+    # f.write("file '" + filenamesTS[0][1].replace("'", "") + "'\n")
     prevts = filenamesTS[0][0]
     prevf = filenamesTS[0][1]
 
     for i in filenamesTS[1:]:
-        ts_diff = i[0] - prevts
+        # ts_diff = i[0] - prevts - (float(prevf.split("_")[3])-float(prevf.split("_")[2])+offsetP+offsetA+0.02)
+        ts_diff = i[0] - prevts - getVidLength(prevf)
 
         # if not os.path.isfile(i[1]):
-            #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
+        #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
         video_crop2(folderPath + i[1].split("/")[-1].split("_")[0] + '.mp4',
                     i[1].split("_")[2],
                     i[1].split("_")[3],
@@ -66,19 +81,66 @@ def videoStitching(filenamesTS, folderPath):
                     i[1].split("_")[4].replace(".mp4", ""),
                     i[1])
 
-        idle_filen = chooseIdleClip(ts_diff, prevf, folderPath)
+        # idle_filen = chooseIdleClip(ts_diff, prevf, folderPath)
+        idle_filen = ""
+        if (i[0] - prevts) > 2 * getVidLength(prevf):
+            idle_filen = chooseIdleClip(ts_diff, prevf, folderPath)
+        else:
+            r = (i[0] - prevts) / getVidLength(prevf)
+            if r == 0:
+                r = 1
+            command = 'ffmpeg -i {} -filter_complex [0:v]setpts={}*PTS[v];[0:a]atempo={}[a] -map [v] -map [a] {} -y'
+            print('Running', command.format(prevf.replace("'", ""), r, 1 / r,
+                                            prevf.replace(".mp4", "").replace("'", "") + "_.mp4"))
+            subprocess.run(
+                command.format(prevf.replace("'", ""), r, 1 / r, prevf.replace(".mp4", "").replace("'", "") + "_.mp4"),
+                shell=True)
+            prevf = prevf.replace(".mp4", "") + "_.mp4"
 
-        f.write("file '" + i[1].replace("'", "") + "'\n")
-        f.write("file '" + idle_filen + "'\n")
+        f.write("file '" + prevf.replace("'", "") + "'\n")
+        if idle_filen != "":
+            f.write("file '" + idle_filen + "'\n")
+            idle_time_rem = ts_diff - getVidLength(idle_filen)
+            while idle_time_rem > 0:
+                random_idle = random.choice(os.listdir(folderPath + '/cache/IdleClips/'))
+                print('Random Selected for first idle:', random_idle)
+                len_r = getVidLength(folderPath + "cache/IdleClips/" + random_idle)
+                r = idle_time_rem / len_r
+
+                if r > max_vid_stretch:
+                    r = max_vid_stretch
+                # shutil.copyfile(folderPath+'/cache/IdleClips/'+random_idle, folderPath+"forStitching/"+folderPath.split('/')[-2]+"_0.00_0_0_Idle.mp4")
+                r1st_idle = folderPath + 'forStitching/idle' + str(r_cnt)
+                print('Running',
+                      '\n\tffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_idle + ' -vf ' + ' setpts=' + str(
+                          r) + '*PTS ' + r1st_idle)
+                subprocess.run(
+                    'ffmpeg' + ' -i ' + folderPath + "cache/IdleClips/" + random_idle + ' -vf ' + ' setpts=' + str(
+                        r) + '*PTS ' + r1st_idle + "_.mp4" + ' -y',
+                    shell=True)
+                null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
+                subprocess.run(
+                    null_command.format(r1st_idle + '_.mp4', r1st_idle + '.mp4').split(' '),
+                    shell=True)
+
+                f.write('file ' + r1st_idle + ".mp4\n")
+                idle_time_rem -= getVidLength(r1st_idle + ".mp4")
+                r_cnt += 1
+
         prevts = i[0]
         prevf = i[1]
 
-        print('Comleted:', filenamesTS.index(i), '/', len(filenamesTS))
+        print('Completed:', filenamesTS.index(i), '/', len(filenamesTS))
+
+    # idle_filen = chooseIdleClip(ts_diff, prevf, folderPath) // take last idle acc to song ending
+    f.write("file '" + prevf.replace("'", "") + "'\n")
+    # f.write("file '" + idle_filen + "'\n")
     print(f)
     f.close()
 
+
 def stitchFinal(folderPath):
-    shutil.copyfile(folderPath+"stitchVideo.txt","./stitchVideo.txt")
+    shutil.copyfile(folderPath + "stitchVideo.txt", "./stitchVideo.txt")
     subprocess.run('ffmpeg -f concat -i stitchVideo.txt -c copy ./output.mp4 -y', shell=True)
 
 
@@ -131,7 +193,10 @@ def chooseIdleClip(ts_diff, prevf, folderPath):
                 '',
                 'Idle',
                 temp_idle_file_name)
-    r = ts_diff / (float(end_ts) - float(ts))
+    # r = ts_diff / (float(end_ts) - float(ts) + offsetP+offsetA+0.02)
+    r = ts_diff / getVidLength(temp_idle_file_name)
+    if r > max_vid_stretch:
+        r = max_vid_stretch
 
     if os.path.isfile(idle_file_name + '.mp4'):
         return idle_file_name + '.mp4'
@@ -163,7 +228,7 @@ if __name__ == "__main__":
                    [38.46158333333333, 'resources/obama/forStitching/obama_38.46158333333333_147.18_147.27_I.mp4'],
                    [38.63540010416666,
                     "resources/obama/forStitching/obama_38.63540010416666_137.74_137.92000000000002_don't.mp4"],
-                   [38.99043010416666, 'resources/obama/forStitching/obama_38.99043010416666_147.27_147.87_know.mp4'],
-                   [39.34915833333333, 'resources/obama/forStitching/obama_39.34915833333333_238.27_238.45_what.mp4']]
+                   [48.99043010416666, 'resources/obama/forStitching/obama_38.99043010416666_147.27_147.87_know.mp4'],
+                   [58.34915833333333, 'resources/obama/forStitching/obama_39.34915833333333_238.27_238.45_what.mp4']]
     videoStitching(filenamesTS, folderPath)
     stitchFinal(folderPath)

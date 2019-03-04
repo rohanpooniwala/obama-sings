@@ -44,6 +44,8 @@ def lyricsTS2filenamesTS(person, lyrics_timestamps):
             # cropped_vid_ts = segment_word()
             # filenamesTS.append([ts, cropped_vid_ts])
 
+    with open("resources/"+person+'/musicTimeStamps.txt','w') as h:
+        h.write("\n".join([','.join([str(__) for __ in _]) for _ in filenamesTS]))
     return filenamesTS
 
 

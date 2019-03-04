@@ -5,8 +5,8 @@ import json
 import os.path
 import datetime
 
-offsetP = 0.05
-offsetA = 0.05
+offsetP = 0.00
+offsetA = 0.00
 
 
 # to access from dictionary dictname["key"]
@@ -19,6 +19,12 @@ def convertBackTime(t):
     h, m, s = t.split(':')
     return float(h) * 3600 + float(m) * 60 + float(s)
 
+
+def getVidLength(input_video):
+    input_video = input_video.replace("'", '')
+    result = subprocess.Popen('ffprobe -i '+ input_video +' -show_entries format=duration -v quiet -of csv="p=0"', stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    output = result.communicate()
+    return float(output[0].decode().strip("\n"))
 
 def video_crop(videoname, ts, end_ts, musicts, word):
     print("Cropping word ", word, " for " + musicts + " from ", videoname, ", time " + ts + " - " + end_ts)
