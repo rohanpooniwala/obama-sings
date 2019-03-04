@@ -198,9 +198,6 @@ def chooseIdleClip(ts_diff, prevf, folderPath):
     if r > max_vid_stretch:
         r = max_vid_stretch
 
-    if os.path.isfile(idle_file_name + '.mp4'):
-        return idle_file_name + '.mp4'
-
     # null_command = '''ffmpeg -f lavfi -i anullsrc -i {} -shortest -c:v copy -c:a aac -map 0:a -map 1:v {} -y'''
     null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
     subprocess.run(
