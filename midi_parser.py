@@ -1,5 +1,5 @@
 import midi
-import midi_to_audio
+# import midi_to_audio
 
 def load_lyrics(lyrics_path):
     lyrics = open(lyrics_path).read().split("\n")
