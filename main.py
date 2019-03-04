@@ -5,6 +5,12 @@ import urllib
 from lyricsTS2filenamesTS import lyricsTS2filenamesTS
 from videoStitcher import videoStitching, stitchFinal
 from word_timestamps import extractWordTimestamps
+import os
+
+os.makedirs('temp', exist_ok=True)
+os.makedirs('temp_midi', exist_ok=True)
+os.makedirs('temp_mp3', exist_ok=True)
+os.makedirs('temp_video', exist_ok=True)
 
 if __name__ == "__main__":
     song = str(input("Enter Song to use:"))
@@ -28,6 +34,9 @@ if __name__ == "__main__":
     print("lyrics_filename", lyrics_filename)
 
     person = 'obama'
+    
+    os.makedirs('resources/'+person+'/cache', exist_ok=True)
+    os.makedirs('resources/'+person+'/forStitching', exist_ok=True)
 
     # Load lyrics
     # start loop
