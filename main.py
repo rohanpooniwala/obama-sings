@@ -8,7 +8,7 @@ from word_timestamps import extractWordTimestamps
 
 if __name__ == "__main__":
     song = str(input("Enter Song to use:"))
-    # song = "beatles"
+    # song = "this is my life"
 
     file_name = scrapers.get_song_links(song)[:10]
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     [print("{}. {}".format(file_name.index(_), urllib.parse.unquote(_[2].replace("+"," ")))) for _ in file_name]
 
     index = int(input("Index:"))
-    # index = 7
+    # index = 0
     scrapers.download_kar(file_name[index])
     print("Downloaded:", file_name[index])
     print("="*20)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # auto tune?
     # add bg
     midi_to_audio.midi_to_audio(midi_filename, './temp_mp3/'+file_name[index][2]+'.mp3')
-    midi_to_audio.combine_audio("output.mp4", './temp_mp3/'+file_name[index][2] +'.mp3', 'ObamaSings.mp4')
+    midi_to_audio.combine_audio("output.mp4", './temp_mp3/'+file_name[index][2] +'.mp3', 'ObamaSings_'+file_name[index][2]+'.mp4')
 
 
 

@@ -24,6 +24,9 @@ def video_crop(videoname, ts, end_ts, musicts, word):
     print("Cropping word ", word, " for " + musicts + " from ", videoname, ", time " + ts + " - " + end_ts)
     print('/'.join(videoname.split("/")[:-1]) + '/forStitching/' + os.path.splitext(os.path.basename(videoname))[0] + '_' + str(convertBackTime(ts)) + '_' + str(convertBackTime(end_ts)) + '_' + word + '.mp4')
     end_filename = '/'.join(videoname.split("/")[:-1]) + '/forStitching/' + os.path.splitext(os.path.basename(videoname))[0] + '_' + musicts + '_' + str(convertBackTime(ts)) + '_' + str(convertBackTime(end_ts)) + '_' + word + '.mp4'
+    end_filename = end_filename.replace("'", '')
+    if os.path.isfile(end_filename):
+        return end_filename
     subprocess.run(
         'ffmpeg' + ' -i ' + videoname + ' -ss ' + convertTime(convertBackTime(ts) - offsetP) +
         ' -to ' + convertTime(convertBackTime(end_ts) + offsetA) + ' ' + end_filename + ' -y',
@@ -39,6 +42,8 @@ def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
     # end_filename = '/'.join(videoname.split("/")[:-1]) + os.path.splitext(os.path.basename(videoname))[0] + '_' + musicts + '_' + str(ts) + '_' + str(end_ts) + '_' + word + '.mp4'
     print(end_filename)
     end_filename = end_filename.replace("'", '')
+    if os.path.isfile(end_filename):
+        return end_filename
     subprocess.run(
         'ffmpeg' + ' -i ' + videoname + ' -ss ' + convertTime(float(ts) - offsetP) +
         ' -to ' + convertTime(float(end_ts) + offsetA) + ' ' + end_filename + ' -y',

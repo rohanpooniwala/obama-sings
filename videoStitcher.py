@@ -57,7 +57,8 @@ def videoStitching(filenamesTS, folderPath):
     for i in filenamesTS[1:]:
         ts_diff = i[0] - prevts
 
-        #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
+        # if not os.path.isfile(i[1]):
+            #    def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
         video_crop2(folderPath + i[1].split("/")[-1].split("_")[0] + '.mp4',
                     i[1].split("_")[2],
                     i[1].split("_")[3],
@@ -71,6 +72,8 @@ def videoStitching(filenamesTS, folderPath):
         f.write("file '" + idle_filen + "'\n")
         prevts = i[0]
         prevf = i[1]
+
+        print('Comleted:', filenamesTS.index(i), '/', len(filenamesTS))
     print(f)
     f.close()
 
@@ -130,16 +133,20 @@ def chooseIdleClip(ts_diff, prevf, folderPath):
                 temp_idle_file_name)
     r = ts_diff / (float(end_ts) - float(ts))
 
-    subprocess.run(
-        'ffmpeg' + ' -i ' + temp_idle_file_name + ' -vf ' + ' setpts=' + str(
-            r) + '*PTS ' + idle_file_name + '__.mp4 -y',
-        shell=True)
+    if os.path.isfile(idle_file_name + '.mp4'):
+        return idle_file_name + '.mp4'
 
     # null_command = '''ffmpeg -f lavfi -i anullsrc -i {} -shortest -c:v copy -c:a aac -map 0:a -map 1:v {} -y'''
     null_command = "ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i {} -shortest -c:v copy -c:a aac {} -y"
     subprocess.run(
-        null_command.format(idle_file_name+ '__.mp4', idle_file_name + '.mp4').split(' '),
+        null_command.format(temp_idle_file_name, idle_file_name + '__.mp4').split(' '),
         shell=True)
+
+    subprocess.run(
+        'ffmpeg' + ' -i ' + idle_file_name + '__.mp4' + ' -vf ' + ' setpts=' + str(
+            r) + '*PTS ' + idle_file_name + '.mp4' + ' -y',
+        shell=True)
+
     return idle_file_name + '.mp4'
 
 

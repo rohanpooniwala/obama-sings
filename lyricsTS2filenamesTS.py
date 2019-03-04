@@ -1,7 +1,7 @@
 import os
 import random
 from video_crop_cache import video_crop
-
+import shutil
 
 def lyricsTS2filenamesTS(person, lyrics_timestamps):
     filenamesTS = []
@@ -21,16 +21,19 @@ def lyricsTS2filenamesTS(person, lyrics_timestamps):
                 data_Txt = f.read().split("\n")[1:]
             for data_Txt_i in data_Txt:
                 if word == data_Txt_i.split(",")[2]:
-                    print("123"*70)
                     cropped_vid_ts = video_crop(Txt.replace('TimestampTxt.txt', '.mp4'), data_Txt_i.split(",")[0], data_Txt_i.split(",")[1], str(ts), word)
                     filenamesTS.append([ts, cropped_vid_ts])
                     not_found = False
+                    print("Completed ", lyrics_timestamps.index(i), "/", len(lyrics_timestamps))
                     break
         if not_found:
             print("not found in txt, finding ", word, ' from cache')
             try:
                 selected_vid = random.choice(os.listdir('resources/' + person + '/cache/' + word))
-                filenamesTS.append([ts, selected_vid])
+                temp = selected_vid.replace('.mp4', '').split('_')
+                newfilename = 'resources/' + person + '/forStitching/{}_{}_{}_{}_{}.mp4'.format(temp[1], ts, temp[2], temp[3], word)
+                shutil.copyfile('resources/' + person + '/cache/' + word + '/' + selected_vid, newfilename)
+                filenamesTS.append([ts, newfilename])
                 not_found = False
                 print('found in cache')
             except Exception as e:
