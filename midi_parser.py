@@ -8,23 +8,7 @@ def load_lyrics(lyrics_path):
         temp += _.split(" ")
     return temp
 
-def get_word_timestamp(midifile):
-    pattern = midi.read_midifile(midifile)
-    pattern.make_ticks_abs()
-    first_event = None
-    for _ in pattern[0]:
-        if type(_) == midi.SetTempoEvent:
-            first_event = _
-            break
-    time_per_tick = first_event.mpqn / (10**6 * pattern.resolution)
-    
-    timestamps = []
 
-    for _ in pattern[2]:
-        if type(_) == midi.TextMetaEvent and _.text[0] != "@":
-            temp_word = _.text.replace("/", "").replace("\\", "").strip()
-            for _word in temp_word.split(" "):
-                timestamps.append([_.tick * time_per_tick, _word])
 
     # timestamps = ([[_.tick * time_per_tick, _.text.replace("/", "").replace("\\", "").strip()] for _ in pattern[2] if type(_) == midi.TextMetaEvent and _.text[0] != "@"])
     return timestamps
