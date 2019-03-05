@@ -60,8 +60,8 @@ if __name__ == "__main__":
     with open('obama.json') as f:
         data = json.load(f)
 
-    path = 'speech_videos'
-    path1 = 'obama2/'
+    path = './resources/speech_videos/obama/obama.mp4'
+    path1 = '.resources/obama/'
 
     for keys in data:
         print(type(data[keys]))
