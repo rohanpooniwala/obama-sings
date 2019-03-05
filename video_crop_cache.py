@@ -56,7 +56,7 @@ def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
         shell=True)
     return end_filename
 
-if __name__ == "__main_":
+if __name__ == "__main__":
     with open('obama.json') as f:
         data = json.load(f)
 
