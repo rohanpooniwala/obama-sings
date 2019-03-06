@@ -56,12 +56,12 @@ def video_crop2(videoname, ts, end_ts, musicts, word, end_filename):
         shell=True)
     return end_filename
 
-if __name__ == "__main_":
-    with open('obama.json') as f:
+if __name__ == "__main__":
+    with open('./resources/obama/obama.json') as f:
         data = json.load(f)
 
-    path = 'speech_videos'
-    path1 = 'obama2/'
+    path = './resources/obama/'
+    path1 = '.resources/obama/'
 
     for keys in data:
         print(type(data[keys]))

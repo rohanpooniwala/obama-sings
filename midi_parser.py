@@ -26,6 +26,7 @@ def get_word_timestamp(midifile):
             for _word in temp_word.split(" "):
                 timestamps.append([_.tick * time_per_tick, _word])
 
+
     # timestamps = ([[_.tick * time_per_tick, _.text.replace("/", "").replace("\\", "").strip()] for _ in pattern[2] if type(_) == midi.TextMetaEvent and _.text[0] != "@"])
     return timestamps
 
