@@ -1,4 +1,4 @@
-file resources/obama/forStitching/first0.mp4
+file resources/obama/forStitching/first1.mp4
 file resources/obama/forStitching/first1.mp4
 file resources/obama/forStitching/first2.mp4
 file resources/obama/forStitching/first3.mp4
